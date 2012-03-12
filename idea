@@ -1,0 +1,27 @@
+
+i have alot of domains w/ nothing on them
+
+i want an easy way to just scrape tweets which contain
+the hashtag as part of the message
+
+show images / vides
+
+oEmbed protocol / Embedly (costs too much)
+
+keep db of oembed responses?
+have seperate cron job which searches twitter / pushes into db ?
+keep db as flat file?
+
+OK
+might as well use revent
+
+pieces:
+ scanning twitter for hashtags, firing new tweet events (tweet data as payload)
+ consuming new tweet events, looking up embed html for tweet,
+  firing new embed events (embed data payload)
+ consuming embed events, pushes data into db
+
+for now we'll ignore cache age, twitter sets their cache age
+ to be forever anyway
+ 
+ 

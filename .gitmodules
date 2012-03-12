@@ -1,0 +1,3 @@
+[submodule "lib/revent"]
+	path = lib/revent
+	url = git@github.com:altalang/Revent.git

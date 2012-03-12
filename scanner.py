@@ -8,7 +8,7 @@ We publish events when we find them
 
 import twitter
 import redis
-from revent import Client as ReventClient
+from lib.revent import Client as ReventClient
 
 twitter_api = twitter.Api()
 

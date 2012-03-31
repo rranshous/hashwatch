@@ -8,15 +8,16 @@ We publish events when we find them
 
 import twitter
 import redis
-from lib.revent import Client as ReventClient
+from lib.revent import ReventClient
 
 twitter_api = twitter.Api()
 
 NS = 'tweet_scanner'
 redis_host = '127.0.0.1'
 rc = redis.Redis(redis_host)
-revent = ReventClient(redis_host)
-
+revent = ReventClient(channel_key = NS,
+                      auto_create_channel = True,
+                      redis_host = redis_host)
 
 def tweet_search(search_string, since_tweet_id=None):
     """
@@ -72,7 +73,11 @@ def run(search_string):
     # go through the tweet data matching the hash
     for tweet_data in tweet_search(search_string, last_tweet_id):
 
+        # add in to the data the search string
+        tweet_data['search_string'] = search_string
+
         # let the world (our network at least) know about tweet
+        print 'firing: %s' % tweet_data.get('id')
         revent.fire('new_tweet', tweet_data)
 
         # set the last tweet id in case we are done running
@@ -81,6 +86,7 @@ def run(search_string):
 if __name__ == '__main__':
     # we should get the target string
     import sys
+    print 'args: %s' % sys.argv
     assert len(sys.argv) > 1, "Please specify search string"
     search_string = sys.argv[1]
     run(search_string)

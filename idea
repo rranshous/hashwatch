@@ -19,7 +19,7 @@ pieces:
  scanning twitter for hashtags, firing new tweet events (tweet data as payload)
  consuming new tweet events, looking up embed html for tweet,
   firing new embed events (embed data payload)
- consuming embed events, pushes data into db
+ consuming both events, pushes data into db
 
 for now we'll ignore cache age, twitter sets their cache age
  to be forever anyway

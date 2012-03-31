@@ -11,10 +11,10 @@ from keys import keys
 NS = 'db_updater'
 redis_host = '127.0.0.1'
 rc = redis.Redis(redis_host)
-filter_string = ReventClient.build_filter_string('new_tweet',
-                                                 'new_embed_details')
+filter_string = ReventClient.build_filter_string('new_tweet','new_oembed_details')
+print 'filter string: %s' % filter_string
 revent = ReventClient(channel_key = NS,
-                      filter_string = 'new_tweet',
+                      filter_string = filter_string,
                       auto_create_channel = True,
                       redis_host = redis_host,
                       verified = True,
@@ -50,7 +50,7 @@ def handle_new_oembed_details(embed_data):
     assert embed_data.get('tweet_id'), "Can only handle tweets"
     assert embed_data.get('html'), "Need HTML for embedding"
 
-    key = keys.tweet_data(tweet_data.get('id'))
+    key = keys.tweet_data(embed_data.get('tweet_id'))
     r = rc.hset(key, 'embed_html', embed_data.get('html'))
 
     # fire event that oembed has been saved
@@ -86,6 +86,6 @@ if __name__ == '__main__':
         try:
             run()
         except Exception, ex:
-            print 'EXCEPTION: %s' % ex
+            raise
             time.sleep(60*2)
 

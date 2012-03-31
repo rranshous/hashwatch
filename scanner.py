@@ -41,7 +41,7 @@ def tweet_search(search_string, since_tweet_id=None):
                                           since_id = since_tweet_id,
                                           per_page = 50,
                                           page = page)
-        for response in responses:
+        for response in reversed(responses):
             yield response.AsDict()
 
         page += 1
@@ -53,8 +53,11 @@ def get_last_tweet_id(search_string):
 
 def set_last_tweet_id(search_string, tweet_id):
     """ sets last tweet id (in redis) """
-    print 'setting: %s' % tweet_id
-    rc.set('%s:last_tweet_id:%s' % (NS, search_string), tweet_id)
+    # only set if higher than currently set
+    last_tweet_id = get_last_tweet_id(search_string)
+    if int(tweet_id) > int(last_tweet_id):
+        print 'setting: %s' % tweet_id
+        rc.set('%s:last_tweet_id:%s' % (NS, search_string), tweet_id)
     return True
 
 def run(search_string):

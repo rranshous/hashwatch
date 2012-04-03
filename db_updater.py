@@ -30,17 +30,28 @@ def handle_new_tweet(tweet_data):
 
     # check for this tweet already being tracked
     set_key = keys.tweet_search_set(tweet_data.get('search_string'))
-    if int(rc.zcount(set_key,tweet_data.get('id'),tweet_data.get('id'))) > 0:
+    tweet_id = tweet_data.get('id')
+    found = rc.zrank(set_key, tweet_id)
+    print 'set key: %s' % set_key
+    print 'found: %s' % found
+
+    if not found:
 
         # set main hash
         key = keys.tweet_data(tweet_data.get('id'))
         rc.hmset(key, tweet_data)
 
         # add to our weighted set
-        return rc.zadd(set_key, '1', tweet_data.get('id'))
+        # keep the value as the id and the weight
+        print 'adding: %s' % tweet_id
+        rc.zadd(set_key, tweet_id, tweet_id)
 
         # fire event that tweet was added to db
         revent.fire('new_tweet_saved', tweet_data)
+
+        return True
+
+    return False
 
 def handle_new_oembed_details(embed_data):
     """
@@ -56,7 +67,7 @@ def handle_new_oembed_details(embed_data):
     # fire event that oembed has been saved
     revent.fire('new_oembed_details_saved', embed_data)
 
-    return r
+    return True
 
 def run():
     """

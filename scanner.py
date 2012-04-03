@@ -54,7 +54,7 @@ def get_last_tweet_id(search_string):
 def set_last_tweet_id(search_string, tweet_id):
     """ sets last tweet id (in redis) """
     # only set if higher than currently set
-    last_tweet_id = get_last_tweet_id(search_string)
+    last_tweet_id = get_last_tweet_id(search_string) or 0
     if int(tweet_id) > int(last_tweet_id):
         print 'setting: %s' % tweet_id
         rc.set('%s:last_tweet_id:%s' % (NS, search_string), tweet_id)

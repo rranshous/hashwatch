@@ -24,4 +24,10 @@ pieces:
 for now we'll ignore cache age, twitter sets their cache age
  to be forever anyway
  
- 
+Create html output? WSGI App ?
+we could have yet another event consumer which re-creates flat fiile html
+output when there is a change worth updating for ?
+
+or we could use a wsgi app but use the events to update the cache ?
+
+we'll go WSGI b/c we're cool like that

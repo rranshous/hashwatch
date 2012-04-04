@@ -12,6 +12,7 @@ log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
 
 import bottle
+from bottle import MakoTemplate
 from bottle import view as _view
 from bottle import get, install, run, Bottle, route, \
                    mako_view
@@ -37,9 +38,15 @@ rc = redis.Redis(config.get('redis_host'))
 # create our application
 application = Bottle()
 
+# update bottle's mako views to be utf8
+MakoTemplate.output_encoding = 'utf-8'
+MakoTemplate.input_encoding = 'utf-8'
+#MakoTemplate.default_filters = ['decode.utf8']
+
 # default page
 @application.route('/')
-@application.route('/<tweet_offset>/<page_size>/')
+@application.route('/<tweet_offset>/')
+@application.route('/<tweet_offset>/<page_size>')
 @mako_view('tweet_page')
 def tweet_page(tweet_offset=0, page_size=20):
     """
@@ -48,6 +55,7 @@ def tweet_page(tweet_offset=0, page_size=20):
 
     # respect max page size
     page_size = max(page_size, int(config.get('max_page_size')))
+    tweet_offset = int(tweet_offset)
 
     log.debug('tweet_page: %s %s', tweet_offset, page_size)
 
@@ -57,10 +65,13 @@ def tweet_page(tweet_offset=0, page_size=20):
     # pull the tweets from redis
     key = keys.tweet_search_set(search_string)
     tweet_data = rc.sort(key,
-                         by='nosort',
                          start=tweet_offset,
                          num=page_size,
-                         get='tweets:*')
+                         get='tweets:*->embed_html',
+                         desc=True)
+
+    # the tweet data is going to be ut8 encoded
+    tweet_data = [x.decode('utf-8') for x in tweet_data]
 
     log.debug('tweet data: %s', tweet_data)
 
@@ -68,7 +79,8 @@ def tweet_page(tweet_offset=0, page_size=20):
     return dict(
         tweet_data = tweet_data,
         tweet_offset = tweet_offset,
-        page_size = page_size
+        page_size = page_size,
+        search_string = search_string
     )
 
 

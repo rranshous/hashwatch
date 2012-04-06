@@ -60,7 +60,7 @@ log.debug('debug?: %s',DEBUG)
 
 # setup our redis client
 rc = redis.Redis(config.get('redis_host'),
-                 config.get('redis_db'))
+                 db=int(config.get('redis_db')))
 
 # create our application
 application = Bottle()

@@ -15,7 +15,7 @@ import bottle
 from bottle import MakoTemplate
 from bottle import view as _view
 from bottle import get, install, run, Bottle, route, \
-                   mako_view
+                   mako_view, request
 import redis
 
 from keys import keys
@@ -27,13 +27,40 @@ if 'production' in sys.argv:
 else:
     config = ConfigSmasher(['./development.ini']).smash()
 
+
+def get_search_string():
+    """
+    returns the search string for the request
+    will give priority to config, than start
+    inspecting request details to figure it out
+    """
+
+    # check config
+    search_string = config.get('search_string')
+
+    # if we didn't get it from the config,
+    # than lets check the request
+    if not search_string:
+        # the project assumes here the search
+        # string is the host (w/o the TLD)
+        host = request.environ.get('HTTP_HOST',
+                request.environ.get('SERVER_NAME'))
+
+        # in case we are on a subdomain, and strip the TLD
+        # ex: twitterstuff.mydomain.net
+        search_string = host.split('.')[-1]
+
+    return search_string
+
+
 # are we in debug mode?
 DEBUG = config.get('debug')
 bottle.debug(DEBUG)
 log.debug('debug?: %s',DEBUG)
 
 # setup our redis client
-rc = redis.Redis(config.get('redis_host'))
+rc = redis.Redis(config.get('redis_host'),
+                 config.get('redis_db'))
 
 # create our application
 application = Bottle()
@@ -59,8 +86,8 @@ def tweet_page(tweet_offset=0, page_size=20):
 
     log.debug('tweet_page: %s %s', tweet_offset, page_size)
 
-    # get our search term from config
-    search_string = config.get('search_string')
+    # get our search term
+    search_string = get_search_string()
 
     # pull the tweets from redis
     key = keys.tweet_search_set(search_string)

@@ -5,10 +5,16 @@
 
 <body>
     <h1>${search_string}</h1>
+    <div class="nav">
+        <b>Page ${max(1,tweet_offset / page_size)}</b>
+        <a href="/${max(0,tweet_offset-page_size)}/">Prev</a>
+        <a href="/${tweet_offset+page_size}/">Next</a>
+    </div>
     % for embed_html in tweet_data:
     ${embed_html}
     % endfor
     <div class="nav">
+        <b>Page ${max(1,tweet_offset / page_size)}</b>
         <a href="/${max(0,tweet_offset-page_size)}/">Prev</a>
         <a href="/${tweet_offset+page_size}/">Next</a>
     </div>

@@ -1,3 +1,4 @@
 *.pyc
 *.swo
 /domains.txt
+/embedly_key.txt

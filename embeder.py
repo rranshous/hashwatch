@@ -47,6 +47,7 @@ def get_twitter_embed_data(tweet_data):
     embed_result = twitter_embed_consumer.embed('',id=tweet_data.get('id'))
     assert embed_result, "No oEmbeded response for %s" % tweet_data.get('id')
     embed_data = embed_result.getData()
+    embed_data['oembed_source'] = 'twitter'
     return embed_data
 
 def get_embedly_embed_data(twitter_embed_data):
@@ -60,6 +61,7 @@ def get_embedly_embed_data(twitter_embed_data):
     assert embed_result, \
             "No Embedly response for %s" % twitter_embed_data.get('url')
     embed_data = embed_result.getData()
+    embed_data['oembed_source'] = 'embedly'
     return embed_data
 
 
@@ -90,6 +92,7 @@ def run():
 
             # now hit up embedly
             embedly_embed_data = get_embedly_embed_data(twitter_embed_data)
+            embedly_embed_data['tweet_id'] = tweet_data.get('id')
 
             # fire off the events
             revent.fire('new_embedly_oembed_details', embedly_embed_data)

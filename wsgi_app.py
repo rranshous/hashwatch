@@ -15,11 +15,16 @@ import bottle
 from bottle import MakoTemplate
 from bottle import view as _view
 from bottle import get, install, run, Bottle, route, \
-                   mako_view, request
+                   mako_view, request, static_file
 import redis
+
+from os.path import dirname, abspath, join as path_join
 
 from keys import keys
 from lib.configsmash import ConfigSmasher
+
+HERE = abspath(dirname(abspath(__file__)))
+STATIC_ROOT = abspath(path_join(HERE,'./static'))
 
 # read in our config
 if 'production' in sys.argv:
@@ -70,6 +75,11 @@ MakoTemplate.output_encoding = 'utf-8'
 MakoTemplate.input_encoding = 'utf-8'
 #MakoTemplate.default_filters = ['decode.utf8']
 
+# serve static files
+@application.route('/static/<filename:path>')
+def send_static(filename):
+    return static_file(filename, root=STATIC_ROOT)
+
 # default page
 @application.route('/')
 @application.route('/<tweet_offset>/')
@@ -98,7 +108,7 @@ def tweet_page(tweet_offset=0, page_size=20):
                          desc=True)
 
     # the tweet data is going to be ut8 encoded
-    tweet_data = [x.decode('utf-8') for x in tweet_data]
+    tweet_data = [x.decode('utf-8') for x in tweet_data if x]
 
     log.debug('tweet data: %s', tweet_data)
 

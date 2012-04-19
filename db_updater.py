@@ -11,9 +11,11 @@ from keys import keys
 NS = 'db_updater'
 redis_host = '127.0.0.1'
 rc = redis.Redis(redis_host)
-watched_events = ['new_tweet','new_oembed_details']
+
+# we're going to subscribe
+event_filter = '^new_.*_oembed_details$|^new_tweet$'
 revent = ReventClient(channel_key = NS,
-                      events_to_watch = watched_events,
+                      filter_string = event_filter,
                       redis_host = redis_host,
                       verified = True,
                       verify_timeout = 60)
@@ -56,11 +58,25 @@ def handle_new_oembed_details(embed_data):
     updates the twitter's data w/ the embed data
     """
 
-    assert embed_data.get('tweet_id'), "Can only handle tweets"
-    assert embed_data.get('html'), "Need HTML for embedding"
+    source = embed_data.get('oembed_source').strip()
+    tweet_id = embed_data.get('tweet_id')
 
-    key = keys.tweet_data(embed_data.get('tweet_id'))
-    r = rc.hset(key, 'embed_html', embed_data.get('html'))
+    assert tweet_id, "Can only handle tweets"
+    assert embed_data.get('html'), "Need HTML for embedding"
+    assert source, "Need to know where this came from"
+
+    print 'new oembed details: %s %s' % (source, len(embed_data))
+
+    # store all the data we received
+    key = keys.tweet_embed_data(source,tweet_id)
+    r = rc.hmset(key, embed_data)
+
+    # we are giving preference to embedly data,
+    # so also update the tweet's data w/ the embedly html
+    if source == 'embedly':
+        print 'embedly found, updating tweet data'
+        key = keys.tweet_data(tweet_id)
+        r = rc.hset(key, 'embed_html', embed_data.get('html'))
 
     # fire event that oembed has been saved
     revent.fire('new_oembed_details_saved', embed_data)
@@ -78,13 +94,13 @@ def run():
         event_name, event_data = revent.get_event(block=True, timeout=5)
 
         if event_name is not None:
+            print 'received: %s' % event_name
 
-            print 'handling: %s' % event_name
+            if event_name.endswith('_oembed_details'):
+                handle_new_oembed_details(event_data)
 
-            # push event details to handler
-            handler = globals().get('handle_%s' % event_name)
-            assert handler, "No handler for %s" % event_name
-            handler(event_data)
+            elif event_name == 'new_tweet':
+                handle_new_tweet(event_data)
 
             # and we're done
             assert revent.verify_msg(event_name, event_data), \

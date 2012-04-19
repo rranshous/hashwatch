@@ -11,11 +11,9 @@ from keys import keys
 NS = 'db_updater'
 redis_host = '127.0.0.1'
 rc = redis.Redis(redis_host)
-filter_string = ReventClient.build_filter_string('new_tweet','new_oembed_details')
-print 'filter string: %s' % filter_string
+watched_events = ['new_tweet','new_oembed_details']
 revent = ReventClient(channel_key = NS,
-                      filter_string = filter_string,
-                      auto_create_channel = True,
+                      events_to_watch = watched_events,
                       redis_host = redis_host,
                       verified = True,
                       verify_timeout = 60)

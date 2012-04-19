@@ -16,8 +16,7 @@ consumer.addEndpoint(endpoint)
 NS = 'embeder'
 redis_host = '127.0.0.1'
 revent = ReventClient(channel_key = NS,
-                      filter_string = 'new_tweet',
-                      auto_create_channel = True,
+                      events_to_watch = ['new_tweet'],
                       redis_host = redis_host,
                       verified = True,
                       verify_timeout = 60)

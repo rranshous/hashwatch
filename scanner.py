@@ -15,9 +15,7 @@ twitter_api = twitter.Api()
 NS = 'tweet_scanner'
 redis_host = '127.0.0.1'
 rc = redis.Redis(redis_host)
-revent = ReventClient(channel_key = NS,
-                      auto_create_channel = True,
-                      redis_host = redis_host)
+revent = ReventClient(redis_host = redis_host)
 
 def tweet_search(search_string, since_tweet_id=None):
     """

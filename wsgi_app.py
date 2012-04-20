@@ -52,7 +52,7 @@ def get_search_string():
                 request.environ.get('SERVER_NAME'))
 
         # in case we are on a subdomain, and strip the TLD
-        # ex: twitterstuff.mydomain.net
+        # ex: twitterstuff.mydomain.net = mydomain
         search_string = host.split('.')[-1]
 
     return search_string
@@ -67,23 +67,20 @@ log.debug('debug?: %s',DEBUG)
 rc = redis.Redis(config.get('redis_host'),
                  db=int(config.get('redis_db')))
 
-# create our application
-application = Bottle()
-
 # update bottle's mako views to be utf8
 MakoTemplate.output_encoding = 'utf-8'
 MakoTemplate.input_encoding = 'utf-8'
 #MakoTemplate.default_filters = ['decode.utf8']
 
 # serve static files
-@application.route('/static/<filename:path>')
+@get('/static/<filename:path>')
 def send_static(filename):
     return static_file(filename, root=STATIC_ROOT)
 
 # default page
-@application.route('/')
-@application.route('/<tweet_offset>/')
-@application.route('/<tweet_offset>/<page_size>')
+@get('/')
+@get('/<tweet_offset>/')
+@get('/<tweet_offset>/<page_size>')
 @mako_view('tweet_page')
 def tweet_page(tweet_offset=0, page_size=20):
     """
@@ -120,6 +117,8 @@ def tweet_page(tweet_offset=0, page_size=20):
         search_string = search_string
     )
 
+# pull out for WSGI servers
+application = bottle.app()
 
 if __name__ == '__main__':
     log.debug('starting')

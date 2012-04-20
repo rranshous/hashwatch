@@ -5,7 +5,7 @@
     <title>${search_string}</title>
     <style>
         body { 
-            background: url("static/subtle_color.png") repeat scroll 0 0 transparent;
+            background: url("/static/subtle_color.png") repeat scroll 0 0 transparent;
         }
         #embeds {
             width: 550px;

@@ -18,6 +18,7 @@ from bottle import get, install, run, Bottle, route, \
                    mako_view, request, static_file
 import redis
 
+import os
 from os.path import dirname, abspath, join as path_join
 
 from keys import keys
@@ -26,17 +27,16 @@ from lib.configsmash import ConfigSmasher
 HERE = abspath(dirname(abspath(__file__)))
 STATIC_ROOT = abspath(path_join(HERE,'./static'))
 
-global config
+# our global config
+config = {}
 def setup_config(*file_paths):
-    # if we didn't get any paths use dev
-    if not file_paths:
-        file_paths = ['./development.ini']
+    global config
     file_paths = [abspath(p) for p in file_paths]
     print 'setting up config: %s' % file_paths
     config = ConfigSmasher(file_paths).smash()
 
 # setup config from env variable, prod server will set
-setup_config(os.environ.get('WSGI_CONFIG_PATH'))
+setup_config(os.environ.get('WSGI_CONFIG_PATH','./development.ini'))
 
 def get_search_string():
     """
@@ -123,7 +123,6 @@ def tweet_page(tweet_offset=0, page_size=20):
     )
 
 # pull out for WSGI servers
-setup_config()
 application = bottle.app()
 
 if __name__ == '__main__':

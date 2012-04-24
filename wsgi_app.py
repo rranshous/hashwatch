@@ -58,7 +58,7 @@ def get_search_string():
 
         # in case we are on a subdomain, and strip the TLD
         # ex: twitterstuff.mydomain.net = mydomain
-        search_string = host.split('.')[-1]
+        search_string = host.split('.')[-2]
 
     return search_string
 

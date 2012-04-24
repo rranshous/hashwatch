@@ -26,12 +26,17 @@ from lib.configsmash import ConfigSmasher
 HERE = abspath(dirname(abspath(__file__)))
 STATIC_ROOT = abspath(path_join(HERE,'./static'))
 
-# read in our config
-if 'production' in sys.argv:
-    config = ConfigSmasher(['./production.ini']).smash()
-else:
-    config = ConfigSmasher(['./development.ini']).smash()
+global config
+def setup_config(*file_paths):
+    # if we didn't get any paths use dev
+    if not file_paths:
+        file_paths = ['./development.ini']
+    file_paths = [abspath(p) for p in file_paths]
+    print 'setting up config: %s' % file_paths
+    config = ConfigSmasher(file_paths).smash()
 
+# setup config from env variable, prod server will set
+setup_config(os.environ.get('WSGI_CONFIG_PATH'))
 
 def get_search_string():
     """
@@ -118,10 +123,12 @@ def tweet_page(tweet_offset=0, page_size=20):
     )
 
 # pull out for WSGI servers
+setup_config()
 application = bottle.app()
 
 if __name__ == '__main__':
     log.debug('starting')
+
     run(application,
         host=config.get('host'),
         port=config.get('port'),

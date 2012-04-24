@@ -7,6 +7,17 @@ import lib.oembed as oembed
 from lib.revent import ReventClient
 import time
 import os.path
+import sys
+from lib.config import config
+
+# setup our config
+if 'production' in sys.argv:
+    config.setup('./production.ini')
+else:
+    config.setup('./development.ini')
+
+redis_host = config.get('redis_host')
+redis_db = config.get('redis_db')
 
 # TODO: consolidate oembed consumers
 
@@ -29,10 +40,10 @@ endpoint = oembed.OEmbedEndpoint(endpoint_url, ['*'])
 embedly_embed_consumer.addEndpoint(endpoint)
 
 NS = 'embeder'
-redis_host = '127.0.0.1'
 revent = ReventClient(channel_key = NS,
                       events_to_watch = ['new_tweet'],
                       redis_host = redis_host,
+                      redis_db = redis_db,
                       verified = True,
                       verify_timeout = 60)
 

@@ -6,17 +6,29 @@ and updates the redis DB tracking tweets
 import redis
 from lib.revent import ReventClient
 import time
+import sys
 from keys import keys
+from lib.config import config
+
+# setup our config
+if 'production' in sys.argv:
+    config.setup('./production.ini')
+else:
+    config.setup('./development.ini')
 
 NS = 'db_updater'
-redis_host = '127.0.0.1'
-rc = redis.Redis(redis_host)
+redis_host = config.get('redis_host')
+redis_db = config.get('redis_db')
+
+rc = redis.Redis(redis_host,
+                 db=redis_db)
 
 # we're going to subscribe
 event_filter = '^new_.*_oembed_details$|^new_tweet$'
 revent = ReventClient(channel_key = NS,
                       filter_string = event_filter,
                       redis_host = redis_host,
+                      redis_db = redis_db,
                       verified = True,
                       verify_timeout = 60)
 

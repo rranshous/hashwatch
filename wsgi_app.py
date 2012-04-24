@@ -23,17 +23,10 @@ from os.path import dirname, abspath, join as path_join
 
 from keys import keys
 from lib.configsmash import ConfigSmasher
+from lib.config import config, setup_config
 
 HERE = abspath(dirname(abspath(__file__)))
 STATIC_ROOT = abspath(path_join(HERE,'./static'))
-
-# our global config
-config = {}
-def setup_config(*file_paths):
-    global config
-    file_paths = [abspath(p) for p in file_paths]
-    print 'setting up config: %s' % file_paths
-    config = ConfigSmasher(file_paths).smash()
 
 # setup config from env variable, prod server will set
 setup_config(os.environ.get('WSGI_CONFIG_PATH','./development.ini'))

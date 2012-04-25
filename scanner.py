@@ -9,25 +9,24 @@ We publish events when we find them
 import twitter
 import redis
 from lib.revent import ReventClient
-from lib.config import config
 import sys
+
+NS = 'tweet_scanner'
+config = CasConfig('.')
 
 # setup our config
 if 'production' in sys.argv:
-    config.setup('./production.ini')
+    config.setup('production', NS)
 else:
-    config.setup('./development.ini')
-
-redis_host = config.get('redis_host')
-redis_db = config.get('redis_db')
+    config.setup('development', NS)
 
 twitter_api = twitter.Api()
 
-NS = 'tweet_scanner'
-rc = redis.Redis(redis_host,
-                 db=redis_db)
-revent = ReventClient(redis_host = redis_host,
-                      redis_db = redis_db)
+rc = redis.Redis(config.get('redis').get('host'),
+                 db=config.get('redis').get('db'))
+
+revent = ReventClient(redis_host=config.get('revent').get('host'),
+                      redis_db=config.get('revent').get('db'))
 
 def tweet_search(search_string, since_tweet_id=None):
     """

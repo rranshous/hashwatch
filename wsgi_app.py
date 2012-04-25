@@ -22,14 +22,16 @@ import os
 from os.path import dirname, abspath, join as path_join
 
 from keys import keys
-from lib.configsmash import ConfigSmasher
-from lib.config import config, setup_config
+from lib.casconfig import CasConfig
 
 HERE = abspath(dirname(abspath(__file__)))
 STATIC_ROOT = abspath(path_join(HERE,'./static'))
 
 # setup config from env variable, prod server will set
-setup_config(os.environ.get('WSGI_CONFIG_PATH','./development.ini'))
+config = CasConfig()
+config_type = os.environ.get('WSGI_CONFIG_TYPE','development')
+print 'config type: %s' % config_type
+config.setup(config_type,'wsgi')
 
 def get_search_string():
     """
@@ -62,8 +64,8 @@ bottle.debug(DEBUG)
 log.debug('debug?: %s',DEBUG)
 
 # setup our redis client
-rc = redis.Redis(config.get('redis_host'),
-                 db=int(config.get('redis_db')))
+rc = redis.Redis(config.get('redis').get('host'),
+                 db=int(config.get('redis').get('db')))
 
 # update bottle's mako views to be utf8
 MakoTemplate.output_encoding = 'utf-8'
@@ -122,7 +124,7 @@ if __name__ == '__main__':
     log.debug('starting')
 
     run(application,
-        host=config.get('host'),
-        port=config.get('port'),
+        host=config.get('wsgi').get('host'),
+        port=config.get('wsgi').get('port'),
         reloader=True if DEBUG else False
     )

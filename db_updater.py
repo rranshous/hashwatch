@@ -8,27 +8,26 @@ from lib.revent import ReventClient
 import time
 import sys
 from keys import keys
-from lib.config import config
+from lib.casconfig import CasConfig
+
+NS = 'db_updater'
+config = CasConfig()
 
 # setup our config
 if 'production' in sys.argv:
-    config.setup('./production.ini')
+    config.setup('production', NS)
 else:
-    config.setup('./development.ini')
+    config.setup('development', NS)
 
-NS = 'db_updater'
-redis_host = config.get('redis_host')
-redis_db = config.get('redis_db')
-
-rc = redis.Redis(redis_host,
-                 db=redis_db)
+rc = redis.Redis(config.get('redis').get('host'),
+                 db=config.get('redis').get('db'))
 
 # we're going to subscribe
 event_filter = '^new_.*_oembed_details$|^new_tweet$'
 revent = ReventClient(channel_key = NS,
                       filter_string = event_filter,
-                      redis_host = redis_host,
-                      redis_db = redis_db,
+                      redis_host = config.get('revent').get('host'),
+                      redis_db = config.get('revent').get('db'),
                       verified = True,
                       verify_timeout = 60)
 

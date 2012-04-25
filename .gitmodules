@@ -1,3 +1,6 @@
 [submodule "lib/revent"]
 	path = lib/revent
 	url = git@github.com:altalang/Revent.git
+[submodule "lib/casconfig"]
+	path = lib/casconfig
+	url = git@github.com:rranshous/casconfig.git

@@ -10,9 +10,10 @@ import twitter
 import redis
 from lib.revent import ReventClient
 import sys
+from lib.casconfig import CasConfig
 
 NS = 'tweet_scanner'
-config = CasConfig('.')
+config = CasConfig()
 
 # setup our config
 if 'production' in sys.argv:

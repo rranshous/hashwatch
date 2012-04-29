@@ -88,7 +88,7 @@ def tweet_page(tweet_offset=0, page_size=20):
     """
 
     # respect max page size
-    page_size = max(page_size, int(config.get('max_page_size')))
+    page_size = max(page_size, int(config.get('wsgi').get('max_page_size')))
     tweet_offset = int(tweet_offset)
 
     log.debug('tweet_page: %s %s', tweet_offset, page_size)

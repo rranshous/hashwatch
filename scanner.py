@@ -29,6 +29,8 @@ rc = redis.Redis(config.get('redis').get('host'),
 revent = ReventClient(redis_host=config.get('revent').get('host'),
                       redis_db=config.get('revent').get('db'))
 
+print 'revent: %s %s' % (revent.redis_host, revent.redis_db)
+
 def tweet_search(search_string, since_tweet_id=None):
     """
     yields up tweet data matching search string since tweet id.

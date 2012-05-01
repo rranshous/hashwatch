@@ -17,6 +17,7 @@ from bottle import view as _view
 from bottle import get, install, run, Bottle, route, \
                    mako_view, request, static_file
 import redis
+from lib.revent import ReventClient
 
 import os
 from os.path import dirname, abspath, join as path_join
@@ -51,9 +52,11 @@ def get_search_string():
         host = request.environ.get('HTTP_HOST',
                 request.environ.get('SERVER_NAME'))
 
-        # in case we are on a subdomain, and strip the TLD
-        # ex: twitterstuff.mydomain.net = mydomain
-        search_string = host.split('.')[-2]
+        if host:
+            # in case we are on a subdomain, and strip the TLD
+            # ex: twitterstuff.mydomain.net = mydomain
+            search_string = host.split('.')[-2]
+
 
     return search_string
 
@@ -66,6 +69,10 @@ log.debug('debug?: %s',DEBUG)
 # setup our redis client
 rc = redis.Redis(config.get('redis').get('host'),
                  db=int(config.get('redis').get('db')))
+
+# setup our revent client
+revent = ReventClient(redis_host=config.get('revent').get('host'),
+                      redis_db=config.get('revent').get('db'))
 
 # update bottle's mako views to be utf8
 MakoTemplate.output_encoding = 'utf-8'
@@ -102,6 +109,13 @@ def tweet_page(tweet_offset=0, page_size=20):
 
     # get our search term
     search_string = get_search_string()
+
+    # announce we've just got a request
+    # for it's data
+    revent.fire('search_string_data_request',{
+                    'search_string':search_string,
+                    'tweet_offset':tweet_offset,
+                    'page_size':page_size })
 
     # pull the tweets from redis
     key = keys.tweet_search_set(search_string)

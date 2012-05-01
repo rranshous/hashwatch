@@ -98,10 +98,34 @@ def run(search_string):
         # set the last tweet id in case we are done running
         set_last_tweet_id(search_string, tweet_data.get('id'))
 
+def get_search_strings():
+    """
+    returns a set of substrings we're searching for
+    """
+
+    # grab them from redis
+    key = keys.search_string_set()
+    strings = self.rc.smembers(key)
+
+    # return the list
+    return strings or set()
+
+def run_all():
+    """
+    runs for all search strings
+    """
+
+    for search_string in get_search_strings():
+        run(search_string)
+
+
 if __name__ == '__main__':
     # we should get the target string
     import sys
     print 'args: %s' % sys.argv
-    assert len(sys.argv) > 1, "Please specify search string"
+    assert len(sys.argv) > 1, "Please specify search string, 'all' for all"
     search_string = sys.argv[1]
-    run(search_string)
+    if search_string.lower().strip() == 'all':
+        run_all()
+    else:
+        run(search_string)

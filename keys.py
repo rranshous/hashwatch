@@ -24,4 +24,7 @@ keys = AttrDict({
         # ordered set of tweet id's w/ weight as timestamp
         # key's are defined by search string
         'tweet_search_set': lambda ss: 'tweets:search_set:%s' % ss
+
+        # set of the search strings we are looking for
+        'search_strings_set': lambda s: s
 })
